@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleAppCmsv2025.Repository
 {
-    public class UserRepositoryImpl
+    public class UserRepositoryImpl : IUserRepository
     {
         // ConnectionString from App.config
         string winConnString = ConfigurationManager.ConnectionStrings["CsWinSql"].ConnectionString;
@@ -24,7 +25,7 @@ namespace ConsoleAppCmsv2025.Repository
                 // sql connection -- connectionstring
                 using (SqlConnection conn = ConnectionManager.OpenConnection(winConnString))
                 {
-                    SqlCommand command = new SqlCommand("sp_GetUserNamePassword", conn);
+                    SqlCommand command = new SqlCommand("sp_AuthenticateUser", conn);
 
                     // CommandType
                     command.CommandType = CommandType.StoredProcedure;

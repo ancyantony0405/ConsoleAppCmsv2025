@@ -11,13 +11,15 @@ namespace ConsoleAppCmsv2025.Service
     {
         // Declare private variable for repository
         public readonly IUserRepository _userRepository;
+        private UserRepositoryImpl userRepositoryImpl;
 
         // DI - connstructor injection
         public UserServiceImpl(IUserRepository userrepository)
         {
             _userRepository = userrepository;
         }
-        public Task<int> AuthenticateUserByRoleIdAsyn(string username, string password)
+
+        public async Task<int> AuthenticateUserByRoleIdAsyn(string username, string password)
         {
             // checking validations for business rules
             return await _userRepository.AuthenticateUserByRoleIdAsyn(username, password);
