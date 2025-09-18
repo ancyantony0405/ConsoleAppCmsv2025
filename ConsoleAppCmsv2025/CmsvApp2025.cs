@@ -63,8 +63,9 @@ namespace ConsoleAppCmsv2025
                             await ShowReceptionistMenuAsync();
                             break;
 
-                        case 2: // Doctor
-                            ShowDoctorMenu();
+                        // Doctor
+                        case 2:
+                            await ShowDoctorMenuAsync();
                             break;
 
                         default:
@@ -86,6 +87,7 @@ namespace ConsoleAppCmsv2025
             }
         }
 
+        #region Receptionist Menu
         private static async Task ShowReceptionistMenuAsync()
         {
             var patientRepo = new PatientRepositoryImpl();
@@ -350,8 +352,14 @@ namespace ConsoleAppCmsv2025
             };
         }
         #endregion
-        private static void ShowDoctorMenu()
+        #endregion
+
+        #region Doctor Menu
+        private static async Task ShowDoctorMenuAsync()
         {
+            IDoctorRepository doctorRepo = new DoctorRepositoryImpl();
+            IDoctorService doctorService = new DoctorServiceImpl(doctorRepo);
+
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("------------------------------");
@@ -359,27 +367,196 @@ namespace ConsoleAppCmsv2025
             Console.WriteLine("------------------------------");
             Console.ResetColor();
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("1. View Appointments");
-            Console.WriteLine("2. Logout");
-            Console.ResetColor();
-            Console.WriteLine();
+            Console.Write("Enter your Doctor Id: ");
+            int doctorId = Convert.ToInt32(Console.ReadLine());
 
-            Console.Write("\nEnter choice: ");
-            string choice = Console.ReadLine();
-
-            switch (choice)
+            bool exit = false;
+            while (!exit)
             {
-                case "1":
-                    Console.WriteLine("Today's appointments...");
-                    break;
-                case "2":
-                    Console.WriteLine("Logging out...");
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice!");
-                    break;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine();
+                Console.WriteLine("1. View Today's Appointments");
+                Console.WriteLine("2. Logout");
+                Console.WriteLine();
+                Console.ResetColor();
+
+                Console.Write("Choose an option: ");
+                string choice = Console.ReadLine();
+                Console.WriteLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        var appointments = await doctorService.GetTodayAppointmentsAsync(doctorId);
+
+                        if (appointments.Count == 0)
+                        {
+                            Console.WriteLine("No appointments for today.");
+                            break;
+                        }
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("--- Today's Appointments ---");
+                        Console.WriteLine();
+                        Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-5}", "ID", "Patient Name", "MMR", "Date & Time", "Token");
+
+                        foreach (var app in appointments)
+                        {
+                            Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-5}",
+                                app.AppointmentId,
+                                app.PatientName,
+                                app.MMRNumber,
+                                app.AppointmentDate.ToString("dd-MM-yyyy HH:mm"),
+                                app.TokenNo);
+                        }
+                        Console.ResetColor();
+
+                        Console.Write("\nEnter AppointmentId to start consultation (0 to cancel): ");
+                        int appId = Convert.ToInt32(Console.ReadLine());
+                        if (appId == 0) break;
+
+                        Console.Write("Enter Diagnosis: ");
+                        string diagnosis = Console.ReadLine();
+                        int consultationId = await doctorService.StartConsultationAsync(appId, diagnosis);
+
+                        bool consultDone = false;
+                        while (!consultDone)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("-- Consultation Menu --");
+                            Console.WriteLine();
+                            Console.WriteLine("1. Prescribe Medicine");
+                            Console.WriteLine("2. Prescribe Test");
+                            Console.WriteLine("3. Finish Consultation");
+                            Console.ResetColor();
+
+                            Console.Write("enter the choice : ");
+                            string consultChoice = Console.ReadLine();
+
+                            switch (consultChoice)
+                            {
+                                // Prescribe Medicine
+                                case "1":
+                                    bool addMoreMeds = true;
+                                    while (addMoreMeds)
+                                    {
+                                        Console.Write("Enter Unique Number in MMR : ");
+                                        string uniquePart = Console.ReadLine();
+
+                                        // Hardcode prefix "MMR" and last two digits of year
+                                        string prefix = "MMR" + DateTime.Now.Year.ToString().Substring(2, 2);
+
+                                        // Combine to get full MMR number
+                                        string mmr = prefix + uniquePart;
+
+                                        Console.WriteLine($"Patient MMR Number: {mmr}");
+                                        int patientId = await doctorService.GetPatientIdByMMRAsync(mmr);
+                                        if (patientId == 0)
+                                        {
+                                            Console.WriteLine("Invalid MMR Number!");
+                                            break;
+                                        }
+
+                                        Console.Write("Enter Medicine Name: ");
+                                        string medName = Console.ReadLine();
+                                        int medicineId = await doctorService.GetMedicineIdByNameAsync(medName);
+                                        if (medicineId == 0)
+                                        {
+                                            Console.WriteLine("Medicine not found!");
+                                            break;
+                                        }
+
+                                        Console.Write("Enter Dosage: ");
+                                        string dosage = Console.ReadLine();
+                                        Console.Write("Enter Duration: ");
+                                        string duration = Console.ReadLine();
+                                        Console.Write("Enter Quantity: ");
+                                        int qty = Convert.ToInt32(Console.ReadLine());
+
+                                        await doctorService.AddMedicineAsync(consultationId, patientId, medicineId, dosage, duration, qty);
+                                        Console.WriteLine("Medicine prescribed successfully!");
+
+                                        Console.Write("Add another medicine? (y/n): ");
+                                        addMoreMeds = Console.ReadLine().ToLower() == "y";
+                                    }
+                                    break;
+
+                                // Prescribe Test
+                                case "2":
+                                    bool addMoreTests = true;
+                                    while (addMoreTests)
+                                    {
+                                        Console.Write("Enter Unique Number in MMR : ");
+                                        string uniquePart = Console.ReadLine();
+
+                                        // Hardcode prefix "MMR" and last two digits of year
+                                        string prefix = "MMR" + DateTime.Now.Year.ToString().Substring(2, 2);
+
+                                        // Combine to get full MMR number
+                                        string mmr = prefix + uniquePart;
+
+                                        Console.WriteLine($"Patient MMR Number: {mmr}");
+                                        int patientId = await doctorService.GetPatientIdByMMRAsync(mmr);
+                                        if (patientId == 0)
+                                        {
+                                            Console.WriteLine("Invalid MMR Number!");
+                                            break;
+                                        }
+
+                                        Console.Write("Enter Test Name: ");
+                                        string testName = Console.ReadLine();
+                                        int testId = await doctorService.GetTestIdByNameAsync(testName);
+                                        if (testId == 0)
+                                        {
+                                            Console.WriteLine("Test not found!");
+                                            break;
+                                        }
+
+                                        await doctorService.AddTestAsync(consultationId, patientId, testId);
+                                        Console.WriteLine("Test prescribed successfully");
+
+                                        Console.Write("Add another test? (y/n): ");
+                                        addMoreTests = Console.ReadLine().ToLower() == "y";
+                                    }
+                                    break;
+
+                                // Finish Consultation and Generate Bill
+                                case "3":
+                                    Console.Write("Enter Patient MMR Number for Billing: ");
+                                    string billMMR = Console.ReadLine();
+                                    int billPatientId = await doctorService.GetPatientIdByMMRAsync(billMMR);
+
+                                    var bill = await doctorService.GenerateBillAsync(consultationId, billPatientId, doctorId);
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                    Console.WriteLine("\n--- Bill Generated ---");
+                                    Console.WriteLine();
+                                    Console.WriteLine($"BillId: {bill.BillId}");
+                                    Console.WriteLine($"Gross Amount: {bill.GrossAmount}");
+                                    Console.WriteLine($"Discount: {bill.DiscountPercent}%");
+                                    Console.WriteLine($"Net Payable: {bill.NetPayable}");
+                                    Console.ResetColor();
+
+                                    consultDone = true;
+                                    break;
+
+                                default:
+                                    Console.WriteLine("Invalid choice. Try again.");
+                                    break;
+                            }
+                        }
+                        break;
+
+                    case "2":
+                        exit = true;
+                        Console.WriteLine("Logging out...");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid choice. Try again.");
+                        break;
+                }
             }
         }
+        #endregion
+
     }
 }

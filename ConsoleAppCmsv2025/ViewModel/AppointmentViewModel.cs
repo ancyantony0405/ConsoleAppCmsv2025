@@ -14,5 +14,8 @@ namespace ConsoleAppCmsv2025.ViewModel
         public DateTime AppointmentDate { get; set; }
         public string Status { get; set; }
         public int TokenNo { get; set; }
+        public string MMRNumber { get; set; }
+        public string AppointmentTime => AppointmentDate.ToString("HH:mm");
+
     }
 }
