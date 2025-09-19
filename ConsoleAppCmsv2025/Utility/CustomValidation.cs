@@ -73,11 +73,11 @@ namespace ConsoleAppCmsv2025.Utility
         #endregion
 
         #region 6 - MMR Number Validation
-        // MMR number format: e.g., MMR2025001
+        // MMR number format: e.g., MMR2501
         public static bool IsValidMMRNumber(string mmr)
         {
             return !string.IsNullOrWhiteSpace(mmr) &&
-                   Regex.IsMatch(mmr, @"^MMR\d{7}$");
+                   Regex.IsMatch(mmr, @"^MMR\d{4}$");
         }
         #endregion
 

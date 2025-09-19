@@ -38,7 +38,7 @@ namespace ConsoleAppCmsv2025.Repository
                         PatientName = reader.GetString(1),
                         MMRNumber = reader.GetString(2),     
                         AppointmentDate = reader.GetDateTime(3),
-                        Status = reader.GetString(4),
+                        Status = reader.IsDBNull(4) ? "Pending" : reader.GetString(4),
                         TokenNo = reader.GetInt32(5)
                     });
                 }
@@ -191,7 +191,34 @@ namespace ConsoleAppCmsv2025.Repository
         }
         #endregion
 
-        #region Get patient by MMR, Medicine by Name, Test by Name
+        #region Finish Consultation
+        public async Task FinishConsultationAsync(int appointmentId)
+        {
+            try
+            {
+                using SqlConnection conn = new(winConnString);
+                using SqlCommand cmd = new SqlCommand("sp_Doctor_FinishConsultation", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@AppointmentId", appointmentId);
+
+                await conn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (SqlException es)
+            {
+                Console.WriteLine("An SqlException error occured :" + es.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occured :" + ex.Message);
+                throw;
+            }
+        }
+        #endregion
+
+
+        #region Get patient by MMR 
         public async Task<int> GetPatientIdByMMRAsync(string mmrNumber)
         {
             try
@@ -218,7 +245,9 @@ namespace ConsoleAppCmsv2025.Repository
                 throw;
             }
         }
+        #endregion
 
+        # region Medicine by Name
         public async Task<int> GetMedicineIdByNameAsync(string medicineName)
         {
             try
@@ -245,7 +274,9 @@ namespace ConsoleAppCmsv2025.Repository
                 throw;
             }
         }
+        #endregion
 
+        #region Test by Name
         public async Task<int> GetTestIdByNameAsync(string testName)
         {
             try

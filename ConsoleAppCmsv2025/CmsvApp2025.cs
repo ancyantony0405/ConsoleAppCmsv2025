@@ -153,19 +153,30 @@ namespace ConsoleAppCmsv2025
             // If patient not found, add new patient
             if (patient == null)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nPatient not found. Adding new patient...");
+                Console.ResetColor();
 
                 Console.Write("Enter Name: ");
                 string name = Console.ReadLine();
 
                 Console.Write("Enter DOB (yyyy-MM-dd): ");
-                DateTime dob = DateTime.Parse(Console.ReadLine());
+                DateTime dob;
+                while (!DateTime.TryParse(Console.ReadLine(), out dob) || !CustomValidation.IsValidPatientDOB(dob))
+                {
+                    Console.Write("Invalid DOB (cannot be in future). Enter DOB again (yyyy-MM-dd): ");
+                }
 
                 Console.Write("Enter Gender (M/F/O): ");
                 string gender = Console.ReadLine();
 
                 Console.Write("Enter Phone: ");
                 string phoneNumber = Console.ReadLine();
+                while (!CustomValidation.IsValidPhone(phoneNumber))
+                {
+                    Console.Write("Invalid phone number. Enter again: ");
+                    phoneNumber = Console.ReadLine();
+                };
 
                 Console.Write("Enter Address: ");
                 string address = Console.ReadLine();
@@ -207,11 +218,14 @@ namespace ConsoleAppCmsv2025
                 }
                 Console.ResetColor();
                 Console.Write("Enter Membership Id to assign (or 0 to skip): ");
+                Console.WriteLine();
                 int memId = int.Parse(Console.ReadLine());
                 if (memId > 0)
                 {
                     await patientRepo.AssignMembershipAsync(patient.PatientId, memId);
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Membership assigned successfully!");
+                    Console.ResetColor();
                 }
             }
             else
@@ -297,13 +311,22 @@ namespace ConsoleAppCmsv2025
             string name = Console.ReadLine();
 
             Console.Write("Enter DOB (yyyy-MM-dd): ");
-            DateTime dob = DateTime.Parse(Console.ReadLine());
+            DateTime dob;
+            while (!DateTime.TryParse(Console.ReadLine(), out dob) || !CustomValidation.IsValidPatientDOB(dob))
+            {
+                Console.Write("Invalid DOB (cannot be in future). Enter DOB again (yyyy-MM-dd): ");
+            }
 
             Console.Write("Enter Gender (M/F/O): ");
             string gender = Console.ReadLine();
 
             Console.Write("Enter Phone: ");
             string phone = Console.ReadLine();
+            while (!CustomValidation.IsValidPhone(phone))
+            {
+                Console.Write("Invalid phone number. Enter again: ");
+                phone = Console.ReadLine();
+            }
 
             Console.Write("Enter Address: ");
             string address = Console.ReadLine();
@@ -397,17 +420,20 @@ namespace ConsoleAppCmsv2025
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("--- Today's Appointments ---");
                         Console.WriteLine();
-                        Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-5}", "ID", "Patient Name", "MMR", "Date & Time", "Token");
+                        Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-7} {5,-12}","ID", "Patient Name", "MMR", "Date & Time", "Token", "Status");
 
                         foreach (var app in appointments)
                         {
-                            Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-5}",
+                            Console.WriteLine("{0,-5} {1,-15} {2,-10} {3,-20} {4,-7} {5,-12}",
                                 app.AppointmentId,
                                 app.PatientName,
                                 app.MMRNumber,
                                 app.AppointmentDate.ToString("dd-MM-yyyy HH:mm"),
-                                app.TokenNo);
+                                app.TokenNo,
+                                string.IsNullOrEmpty(app.Status) ? "Pending" : app.Status
+                            );
                         }
+
                         Console.ResetColor();
 
                         Console.Write("\nEnter AppointmentId to start consultation (0 to cancel): ");
@@ -523,6 +549,7 @@ namespace ConsoleAppCmsv2025
                                 case "3":
                                     Console.Write("Enter Patient MMR Number for Billing: ");
                                     string billMMR = Console.ReadLine();
+                                    Console.WriteLine();
                                     int billPatientId = await doctorService.GetPatientIdByMMRAsync(billMMR);
 
                                     var bill = await doctorService.GenerateBillAsync(consultationId, billPatientId, doctorId);
@@ -557,6 +584,5 @@ namespace ConsoleAppCmsv2025
             }
         }
         #endregion
-
     }
 }

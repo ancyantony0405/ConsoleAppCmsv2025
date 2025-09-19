@@ -27,6 +27,12 @@ namespace ConsoleAppCmsv2025.Service
         {
             return await _doctorRepo.StartConsultationAsync(appointmentId, diagnosis);
         }
+
+        public async Task FinishConsultationAsync(int appointmentId)
+        {
+            await _doctorRepo.FinishConsultationAsync(appointmentId);
+        }
+
         public async Task AddMedicineAsync(int consultationId, int patientId, int medicineId, string dosage, string duration, int quantity)
         {
             await _doctorRepo.AddMedicineAsync(consultationId, patientId, medicineId, dosage, duration, quantity);

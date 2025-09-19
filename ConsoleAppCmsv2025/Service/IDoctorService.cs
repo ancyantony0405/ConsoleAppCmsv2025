@@ -12,6 +12,7 @@ namespace ConsoleAppCmsv2025.Service
     {
         Task<List<AppointmentViewModel>> GetTodayAppointmentsAsync(int doctorId);
         Task<int> StartConsultationAsync(int appointmentId, string diagnosis);
+        Task FinishConsultationAsync(int appointmentId);
         Task AddMedicineAsync(int consultationId, int patientId, int medicineId, string dosage, string duration, int quantity);
         Task AddTestAsync(int consultationId, int patientId, int testId);
         Task<BillViewModel> GenerateBillAsync(int consultationId, int patientId, int doctorId);
