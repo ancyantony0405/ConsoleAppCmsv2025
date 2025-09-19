@@ -447,6 +447,7 @@ namespace ConsoleAppCmsv2025
                         bool consultDone = false;
                         while (!consultDone)
                         {
+                            Console.WriteLine();
                             Console.ForegroundColor = ConsoleColor.Cyan;
                             Console.WriteLine("-- Consultation Menu --");
                             Console.WriteLine();
@@ -454,9 +455,11 @@ namespace ConsoleAppCmsv2025
                             Console.WriteLine("2. Prescribe Test");
                             Console.WriteLine("3. Finish Consultation");
                             Console.ResetColor();
+                            Console.WriteLine();
 
                             Console.Write("enter the choice : ");
                             string consultChoice = Console.ReadLine();
+                            Console.WriteLine();
 
                             switch (consultChoice)
                             {
@@ -481,7 +484,7 @@ namespace ConsoleAppCmsv2025
                                             Console.WriteLine("Invalid MMR Number!");
                                             break;
                                         }
-
+                                        Console.WriteLine();
                                         Console.Write("Enter Medicine Name: ");
                                         string medName = Console.ReadLine();
                                         int medicineId = await doctorService.GetMedicineIdByNameAsync(medName);
@@ -527,7 +530,7 @@ namespace ConsoleAppCmsv2025
                                             Console.WriteLine("Invalid MMR Number!");
                                             break;
                                         }
-
+                                        Console.WriteLine();
                                         Console.Write("Enter Test Name: ");
                                         string testName = Console.ReadLine();
                                         int testId = await doctorService.GetTestIdByNameAsync(testName);
