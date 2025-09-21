@@ -17,6 +17,6 @@ namespace ConsoleAppCmsv2025.Model
         // Navigation properties
         public LabPrescription LabPrescription { get; set; }
         public Test Test { get; set; }
-        public List<LabReport> LabReports { get; set; } = new List<LabReport>();
+        
     }
 }

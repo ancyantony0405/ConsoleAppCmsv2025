@@ -16,6 +16,7 @@ namespace ConsoleAppCmsv2025
             {
                 Console.Clear();
             lblUserName:
+                // UserName label
                 Console.WriteLine("---------------------");
                 Console.BackgroundColor = ConsoleColor.Green;
                 Console.ForegroundColor = ConsoleColor.White;
@@ -250,8 +251,18 @@ namespace ConsoleAppCmsv2025
             int doctorId;
             while (true)
             {
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine();
-                Console.Write("\nEnter Doctor Id to book appointment (1. Cardiologist / 2. Neurologist / 3. Orthopedist / 4.General Physician): ");
+                Console.WriteLine();
+                Console.WriteLine("--- Available Doctors ---");
+                Console.WriteLine();
+                Console.WriteLine("1.Dr.Mary - Orthopedist (10.00 a.m to 1.00 p.m)");
+                Console.WriteLine("2.Dr.Arun - General Physician (10.00 a.m to 3.00 p.m)");
+                Console.WriteLine("3.Dr.John - Cardiologist (9.00 a.m to 12.00 p.m)");
+                Console.WriteLine("4.Dr.Alice - Neurologist (1.00 p.m to 4.00 p.m)");
+                
+                Console.ResetColor();
+                Console.Write("\nEnter Doctor Id to book appointment: ");
                 if (int.TryParse(Console.ReadLine(), out doctorId) && doctorId > 0)
                     break;
                 Console.WriteLine("Invalid Doctor Id. Try again.");
